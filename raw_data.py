@@ -1,8 +1,19 @@
+# raw_data.py
 import pandas as pd
-import os
 import re
-import smtplib
+import gdown
 from sqlalchemy import create_engine, text
+
+# Step 0: Download files from Google Drive
+def download_from_gdrive():
+    csv_url = "https://drive.google.com/uc?id=1paFY1Fz53NfjQF64WHySC3-AMQ0ogJyy"  # 2015.csv
+    rules_url = "https://drive.google.com/uc?id=1TP-ezidA1iF2saBzwqTfTVs-ByjBkRtH"  # Book 5.csv
+
+    print("Downloading 2015.csv from Google Drive...")
+    gdown.download(csv_url, "2015.csv", quiet=False)
+
+    print("Downloading Book 5.csv from Google Drive...")
+    gdown.download(rules_url, "Book 5.csv", quiet=False)
 
 # Load CSV in chunks
 def load_csv_to_db_in_batches(file_path, chunksize, table_name, engine, usecols=None):
@@ -14,7 +25,7 @@ def load_csv_to_db_in_batches(file_path, chunksize, table_name, engine, usecols=
         print(f"Chunk {i+1}: Loaded {len(chunk)} rows")
     print(f"Total rows uploaded: {total_rows}")
 
-# Rule Parsing Function
+# Rule parsing
 def parse_rule_to_sql_condition(column, rule_text):
     if not isinstance(rule_text, str):
         return None
@@ -40,12 +51,18 @@ def parse_rule_to_sql_condition(column, rule_text):
 
 def main():
     try:
-        # --------------- Config ------------------
+        # Step 0: Download files
+        download_from_gdrive()
+
+        # ------------------ Config -------------------
         csv_file_path = "2015.csv"
-        rules_excel_path = "Book 5.xlsx"
+        rules_excel_path = "Book 5.csv"
         chunksize = 20000
         table_name = "raw_table"
-        to_email = "recipient@example.com"  # CHANGE to your target email
+
+        # ---------- Supabase PostgreSQL Connection ----------
+        SUPABASE_DB_URL = "postgresql://postgres.atlvdqqnccdrenirkskg:saira123@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+        engine = create_engine(SUPABASE_DB_URL)
 
         # ---------- Columns to load from CSV ----------
         columns_to_load = [
@@ -54,19 +71,11 @@ def main():
             'MEDCOST', 'CHECKUP1', 'BPHIGH4', 'BPMEDS', 'CHOLCHK', 'TOLDHI2', 'DIABETE3'
         ]
 
-        # ---------- PostgreSQL Connection ----------
-        username = 'postgres'
-        password = 'postgre'  # Update this
-        host = 'localhost'
-        port = '5432'
-        database = 'raw_data'
-        engine = create_engine(f'postgresql://{username}:{password}@{host}:{port}/{database}')
-
-        # ---------- Step 1: Upload CSV in Batches with selected columns ----------
-        print("Uploading CSV to PostgreSQL in chunks...")
+        # ---------- Step 1: Upload CSV ----------
+        print("Uploading CSV to Supabase in chunks...")
         load_csv_to_db_in_batches(csv_file_path, chunksize, table_name, engine, usecols=columns_to_load)
 
-        # ---------- Step 2: Load and Clean Validation Rules ----------
+        # ---------- Step 2: Load Validation Rules ----------
         rules_df = pd.read_excel(rules_excel_path)
         rules_df.columns = (
             rules_df.columns
@@ -86,7 +95,7 @@ def main():
         rules_df = rules_df.head(20)
         print("Validation rules loaded.")
 
-        # -------- Step 3: Apply Validation Rules --------
+        # ---------- Step 3: Apply Rules ----------
         all_invalid_rows = pd.DataFrame()
 
         for idx, row in rules_df.iterrows():
@@ -103,7 +112,7 @@ def main():
 
             sql_query = f"SELECT * FROM {table_name} WHERE {condition}"
             delete_query = f"DELETE FROM {table_name} WHERE {condition}"
-            print(f"Unchecking column '{col}' with rule: {rule}")
+            print(f"Validating column '{col}' with rule: {rule}")
 
             try:
                 invalid_rows = pd.read_sql_query(sql_query, engine)
@@ -118,22 +127,17 @@ def main():
                 invalid_rows['invalid_column'] = col
                 invalid_rows['violated_rule'] = rule
                 all_invalid_rows = pd.concat([all_invalid_rows, invalid_rows], ignore_index=True)
-                print(f"Executing DELETE query: {delete_query}")
-                with engine.begin() as conn:  # Use transaction to ensure commit
+                print(f"Deleting invalid rows for '{col}'...")
+                with engine.begin() as conn:
                     conn.execute(text(delete_query))
-                print(f"Deleted {len(invalid_rows)} invalid rows from {table_name}.")
 
         # Step 4: Save Invalid Rows
         if not all_invalid_rows.empty:
-            print(f"Total invalid rows before deduplication: {len(all_invalid_rows)}")
-            all_invalid_rows = all_invalid_rows.drop_duplicates()
-            print(f"Total invalid rows after deduplication: {len(all_invalid_rows)}")
-            all_invalid_rows.to_csv("invalid_rows1.csv", index=False)
+            all_invalid_rows.drop_duplicates().to_csv("invalid_rows1.csv", index=False)
             print("Invalid rows saved to 'invalid_rows1.csv'")
 
     except Exception as e:
-        error_message = f"PostgreSQL Batch upload failed:\n\n{str(e)}"
-        print(error_message)
+        print(f"[ERROR]: {str(e)}")
 
 if __name__ == "__main__":
     main()
