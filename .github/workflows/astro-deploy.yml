@@ -1,0 +1,21 @@
+name: Deploy DAGs to Astro
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy DAGs to Astro
+        uses: astronomer/deploy-action@v0.3
+        with:
+          api-token: ${{ secrets.ASTRO_API_TOKEN }}
+          deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
+          workspace-id: ${{ secrets.ASTRO_WORKSPACE_ID }}
+s
