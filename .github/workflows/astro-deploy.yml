@@ -18,4 +18,3 @@ jobs:
           api-token: ${{ secrets.ASTRO_API_TOKEN }}
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           workspace-id: ${{ secrets.ASTRO_WORKSPACE_ID }}
-s
