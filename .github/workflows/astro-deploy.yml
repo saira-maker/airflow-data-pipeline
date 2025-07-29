@@ -17,6 +17,5 @@ jobs:
         uses: astronomer/deploy-action@v0.3
         with:
           action: deploy
-          api-key: ${{ secrets.ASTRO_API_TOKEN }}
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
-          workspace-id: ${{ secrets.ASTRO_WORKSPACE_ID }}
+          workspace: ${{ secrets.ASTRO_WORKSPACE_ID }}
