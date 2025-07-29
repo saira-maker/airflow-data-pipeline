@@ -18,8 +18,8 @@ jobs:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
           root-folder: "."
-          deploy-image: false           # ✅ DAGs-only deploy (safe fallback)
-          image-name: "no-custom-image" # ✅ Required even if image isn't built
+          deploy-image: false             # ✅ tells it not to deploy Docker image
+          image-name: "no-custom-image"   # ✅ prevents fallback image logic
           copy-connections: true
           copy-airflow-variables: true
           copy-pools: true
