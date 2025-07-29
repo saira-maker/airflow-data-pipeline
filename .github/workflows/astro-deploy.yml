@@ -17,8 +17,10 @@ jobs:
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
-          root-folder: "."                # ✅ Fixes bash error
-          deploy-image: false
+          root-folder: "."                
+          deploy-image: false             # ✅ You want to only deploy DAGs
+          image-name: "no-custom-image"   # ✅ Add this to prevent bash error
           copy-connections: true
           copy-airflow-variables: true
           copy-pools: true
+
