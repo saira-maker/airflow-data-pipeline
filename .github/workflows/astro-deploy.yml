@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy DAGs to Astro
-        uses: astronomer/deploy-action@v1
+        uses: astronomer/deploy-action@main
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
