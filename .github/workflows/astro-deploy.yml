@@ -8,13 +8,18 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install Astro CLI
+        run: |
+          curl -sSL https://install.astronomer.io | sudo bash
 
       - name: Deploy DAGs to Astro
         uses: astronomer/deploy-action@v0.3
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
-          workspace: ${{ secrets.ASTRO_WORKSPACE_ID }}
+          api-token: ${{ secrets.ASTRO_API_TOKEN }}
           action: deploy
