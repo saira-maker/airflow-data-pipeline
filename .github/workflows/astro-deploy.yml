@@ -18,7 +18,7 @@ jobs:
 
       - name: Authenticate with Astro
         run: |
-          echo "${{ secrets.ASTRO_API_KEY }}" | astro auth login --token -
+          echo "${{ secrets.ASTRO_API_KEY }}" | astro login --token -
 
       - name: Deploy DAGs to Astro
         uses: astronomer/deploy-action@main
