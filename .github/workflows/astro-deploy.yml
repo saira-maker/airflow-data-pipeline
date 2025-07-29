@@ -17,6 +17,7 @@ jobs:
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
+          root-folder: "."              # ✅ This fixes the internal error
           deploy-image: false
           copy-connections: true
           copy-airflow-variables: true
