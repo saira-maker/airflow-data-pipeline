@@ -14,14 +14,12 @@ jobs:
 
       - name: Deploy DAGs to Astro
         uses: astronomer/deploy-action@main
-
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
           root-folder: "."
-          deploy-image: false
-          image-name: "no-custom-image"
-          deploy-type: dags-only            # ✅ This fixes the line 65 bash error
+          deploy-image: false           # ✅ DAGs-only deploy (safe fallback)
+          image-name: "no-custom-image" # ✅ Required even if image isn't built
           copy-connections: true
           copy-airflow-variables: true
           copy-pools: true
