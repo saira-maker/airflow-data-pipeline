@@ -8,21 +8,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Deploy DAGs to Astro
-        uses: astronomer/deploy-action@main  # ✅ Use main only
+        uses: astronomer/deploy-action@main
         with:
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
           action: deploy
-          root-folder: "."                   # ✅ Required
-          deploy-image: false                # ✅ Only deploy DAGs
-          image-name: "no-custom-image"      # ✅ Prevent conditional bug
+          root-folder: "."
+          deploy-image: false
+          deploy-type: dags-only
+          image-name: "no-custom-image"
           copy-connections: true
           copy-airflow-variables: true
           copy-pools: true
           build-secrets: |
-            ASTRO_API_TOKEN=${{ secrets.ASTRO_API_TOKEN }}
+            ASTRO_API_TOKEN=${{ secrets.ASTRO_API_KEY }}
