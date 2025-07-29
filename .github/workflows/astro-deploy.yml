@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Deploy DAGs to Astro
         uses: astronomer/deploy-action@v0.3
         with:
-          api-token: ${{ secrets.ASTRO_API_TOKEN }}
           deployment-id: ${{ secrets.ASTRO_DEPLOYMENT_ID }}
-          workspace-id: ${{ secrets.ASTRO_WORKSPACE_ID }}
+          workspace: ${{ secrets.ASTRO_WORKSPACE_ID }}
+          action: deploy
