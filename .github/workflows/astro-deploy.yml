@@ -11,14 +11,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Install Astro CLI
-        run: |
-          curl -sSL https://install.astronomer.io | sudo bash -s
+        run: curl -sSL https://install.astronomer.io | sudo bash -s
 
-      - name: Authenticate with Astro
-        run: |
-          echo "${{ secrets.ASTRO_API_KEY }}" | astro login --token -
+      - name: Authenticate to Astro
+        run: astro login --token-login ${{ secrets.ASTRO_API_KEY }}
+
+      
 
       - name: Deploy DAGs to Astro
         uses: astronomer/deploy-action@main
